@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Radar de Nichos</title>
+  <style>
+    :root {
+      --ink: #192b28;
+      --muted: #64716c;
+      --paper: #f4f7f5;
+      --surface: #ffffff;
+      --line: #dce5df;
+      --teal: #176c5b;
+      --teal-dark: #125446;
+      --teal-soft: #e6f2ed;
+      --gold: #a56616;
+      --gold-soft: #fbf2e5;
+      --blue: #385f85;
+      --blue-soft: #edf3f8;
+      --danger: #a34238;
+      --shadow: 0 12px 35px rgba(28, 55, 44, .07);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: var(--paper);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); }
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+    .shell { max-width: 1260px; margin: 0 auto; padding: 30px 24px 60px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 28px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 14px; background: var(--teal); color: #fff; font-size: 19px; font-weight: 800; letter-spacing: -.06em; }
+    .brand-name { font-size: 14px; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+    .brand-caption { color: var(--muted); font-size: 12px; margin-top: 3px; }
+    .offline-badge { display: inline-flex; align-items: center; gap: 8px; color: #496259; background: #e9f0ec; border-radius: 999px; padding: 8px 12px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .offline-badge span { width: 7px; height: 7px; background: #3d8b67; border-radius: 50%; }
+    .hero { display: flex; align-items: end; justify-content: space-between; gap: 28px; margin: 0 0 25px; }
+    .eyebrow { color: var(--teal); font-size: 11px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; margin-bottom: 10px; }
+    h1 { margin: 0; font-size: clamp(30px, 4vw, 47px); line-height: 1.05; letter-spacing: -.045em; }
+    .hero p { max-width: 690px; color: var(--muted); line-height: 1.6; margin: 12px 0 0; font-size: 15px; }
+    .hero-note { max-width: 260px; padding: 13px 15px; border-left: 3px solid #9ac5b2; background: rgba(255,255,255,.7); border-radius: 0 12px 12px 0; color: #50635a; font-size: 12px; line-height: 1.55; }
+    .layout { display: grid; grid-template-columns: minmax(290px, 365px) minmax(0, 1fr); gap: 22px; align-items: start; }
+    .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow); }
+    .form-panel { padding: 22px; }
+    .section-head { display: flex; align-items: flex-start; gap: 11px; margin-bottom: 17px; }
+    .step { display: grid; place-items: center; flex: 0 0 27px; height: 27px; border-radius: 9px; color: var(--teal-dark); background: var(--teal-soft); font-size: 11px; font-weight: 800; }
+    h2 { margin: 0; font-size: 17px; letter-spacing: -.02em; }
+    .section-head p { margin: 5px 0 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
+    .form-block { padding: 15px 0; border-top: 1px solid #edf1ee; }
+    .form-block:first-of-type { border-top: 0; padding-top: 0; }
+    .field { margin: 0 0 13px; }
+    .field:last-child { margin-bottom: 0; }
+    .form-label, .range-top label { display: block; margin: 0 0 6px; font-size: 12px; font-weight: 750; }
+    .optional { color: #84918b; font-weight: 500; }
+    .form-control, .form-select { width: 100%; border: 1px solid #d9e2dc; border-radius: 10px; background: #fff; color: var(--ink); padding: 10px 11px; outline: none; font-size: 13px; transition: border-color .15s, box-shadow .15s; }
+    .form-control::placeholder { color: #9aa59f; }
+    .form-control:focus, .form-select:focus, input[type="range"]:focus-visible { border-color: #62a58e; box-shadow: 0 0 0 3px rgba(38, 130, 104, .12); }
+    textarea.form-control { min-height: 70px; resize: vertical; line-height: 1.45; }
+    .field-hint { margin: 5px 0 0; color: #7b8881; font-size: 11px; line-height: 1.4; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .range-row { padding: 9px 0; border-top: 1px solid #f0f3f1; }
+    .range-row:first-child { border-top: 0; padding-top: 0; }
+    .range-top { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 4px; }
+    .range-top label { margin: 0; }
+    .range-value { min-width: 23px; text-align: center; background: var(--teal-soft); color: var(--teal-dark); border-radius: 6px; padding: 2px 5px; font-size: 11px; font-weight: 800; }
+    .range-caption { color: #8b9791; font-size: 10px; display: flex; justify-content: space-between; margin-top: -2px; }
+    input[type="range"] { width: 100%; height: 18px; margin: 0; accent-color: var(--teal); }
+    .form-actions { display: flex; gap: 9px; padding-top: 17px; border-top: 1px solid #edf1ee; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: 1px solid var(--line); background: #fff; color: var(--ink); border-radius: 10px; padding: 10px 13px; font-size: 12px; font-weight: 750; transition: transform .12s, background .15s, border-color .15s; }
+    .btn:hover { background: #f6f9f7; border-color: #b8c9be; }
+    .btn:active { transform: translateY(1px); }
+    .btn:focus-visible { outline: 3px solid rgba(38, 130, 104, .2); outline-offset: 2px; }
+    .btn-primary { flex: 1; background: var(--teal); border-color: var(--teal); color: #fff; }
+    .btn-primary:hover { background: var(--teal-dark); border-color: var(--teal-dark); }
+    .btn-quiet { padding: 9px 11px; }
+    .right-col { min-width: 0; }
+    .results-panel { padding: 22px; }
+    .results-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 15px; }
+    .result-count { color: var(--muted); font-size: 12px; margin-top: 5px; }
+    .results-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .ranking-note { display: flex; gap: 10px; align-items: flex-start; margin: 0 0 17px; padding: 11px 13px; border: 1px solid #eadcc3; border-radius: 11px; color: #6c532f; background: #fffaf2; font-size: 11px; line-height: 1.5; }
+    .ranking-note strong { color: #684713; }
+    .spark { width: 18px; flex: 0 0 18px; height: 18px; display: grid; place-items: center; border-radius: 50%; background: #f3e5c9; font-size: 11px; font-weight: 900; }
+    .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }
+    .idea-card { min-width: 0; padding: 17px; border: 1px solid var(--line); border-radius: 15px; background: #fff; display: flex; flex-direction: column; }
+    .idea-card.featured { border-color: #9dc9b5; box-shadow: inset 0 3px 0 #5b9a7a; }
+    .card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+    .sector-label { color: var(--teal); font-size: 10px; line-height: 1.35; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+    .score { flex: 0 0 auto; display: flex; align-items: baseline; gap: 2px; color: var(--teal-dark); }
+    .score strong { font-size: 21px; letter-spacing: -.05em; }
+    .score span { color: #74837b; font-size: 10px; }
+    .idea-card h3 { font-size: 16px; line-height: 1.27; letter-spacing: -.025em; margin: 10px 0 9px; }
+    .segment { display: inline-flex; width: fit-content; max-width: 100%; margin: 0 0 11px; padding: 5px 8px; color: #50645a; background: #f0f4f1; border-radius: 7px; font-size: 10px; line-height: 1.35; }
+    .card-copy { color: #56645e; font-size: 12px; line-height: 1.55; margin: 0 0 10px; }
+    .card-copy strong { color: #2c3c36; }
+    .score-bars { margin: 3px 0 13px; display: grid; gap: 6px; }
+    .score-line { display: grid; grid-template-columns: 80px minmax(0,1fr) 26px; gap: 7px; align-items: center; color: #707d76; font-size: 10px; }
+    .bar-track { height: 5px; background: #edf1ee; border-radius: 6px; overflow: hidden; }
+    .bar-fill { height: 100%; background: #65a287; border-radius: 6px; }
+    .score-line b { text-align: right; color: #485950; font-size: 10px; }
+    .test-box { margin-top: auto; padding: 10px 11px; border-radius: 10px; background: #f6f8f6; color: #4e6056; font-size: 11px; line-height: 1.5; }
+    .test-box strong { color: #2c483b; }
+    .card-footer { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 11px; }
+    .cost-tag { color: #718078; font-size: 10px; }
+    .compare-btn { min-height: 31px; padding: 6px 9px; border-radius: 8px; font-size: 10px; }
+    .compare-btn[aria-pressed="true"] { color: #fff; background: var(--teal); border-color: var(--teal); }
+    .compare-panel { margin-top: 17px; padding: 18px 20px; }
+    .compare-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .compare-head p { color: var(--muted); margin: 5px 0 0; font-size: 11px; }
+    .compare-empty { color: #7b8881; font-size: 12px; padding: 16px 0 2px; }
+    .compare-list { display: grid; gap: 8px; margin-top: 12px; }
+    .compare-item { display: grid; grid-template-columns: minmax(120px, 1.2fr) minmax(50px, .35fr) minmax(120px, 1.3fr) minmax(90px, .8fr) 32px; gap: 10px; align-items: center; border-top: 1px solid #edf1ee; padding-top: 9px; font-size: 11px; }
+    .compare-item:first-child { border-top: 0; padding-top: 0; }
+    .compare-item strong { font-size: 11px; }
+    .compare-score { color: var(--teal-dark); font-weight: 850; }
+    .compare-sub { color: #6e7b74; line-height: 1.4; }
+    .remove-compare { padding: 4px 7px; }
+    .validation-panel { margin-top: 17px; padding: 18px 20px; }
+    .validation-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 13px; }
+    .validation-step { border-radius: 11px; padding: 12px; background: #f4f7f5; }
+    .validation-step span { display: block; color: var(--teal); font-size: 10px; font-weight: 850; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 5px; }
+    .validation-step p { color: #58665f; font-size: 11px; line-height: 1.5; margin: 0; }
+    .questions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 13px; }
+    .question-chip { color: #5d6a63; background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 6px 9px; font-size: 10px; }
+    .footer-note { display: flex; justify-content: space-between; gap: 16px; color: #7d8982; font-size: 10px; line-height: 1.5; margin-top: 15px; }
+    .footer-note span:first-child { max-width: 700px; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    @media (max-width: 950px) {
+      .layout { grid-template-columns: 330px minmax(0, 1fr); gap: 15px; }
+      .form-panel, .results-panel { padding: 17px; }
+      .cards { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      .shell { padding: 18px 14px 40px; }
+      .topbar { margin-bottom: 22px; }
+      .hero { display: block; }
+      .hero-note { max-width: none; margin-top: 14px; }
+      .layout { grid-template-columns: 1fr; }
+      .cards { grid-template-columns: 1fr; }
+      .results-top { display: block; }
+      .results-actions { margin-top: 12px; }
+      .validation-grid { grid-template-columns: 1fr; }
+      .compare-item { grid-template-columns: minmax(95px, 1fr) 42px minmax(90px, 1.1fr) 30px; }
+      .compare-item .compare-risk { display: none; }
+      .footer-note { display: block; }
+    }
+    @media print {
+      :root, body { background: #fff; }
+      .shell { max-width: none; padding: 0; }
+      .form-panel, .offline-badge, .results-actions, .compare-btn, .remove-compare { display: none !important; }
+      .layout { display: block; }
+      .panel { box-shadow: none; break-inside: avoid; }
+      .results-panel, .compare-panel, .validation-panel { border: 0; padding: 0; margin: 0 0 14px; }
+      .cards { grid-template-columns: repeat(2, 1fr); }
+      .idea-card { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand" aria-label="Radar de Nichos">
+        <div class="brand-mark" aria-hidden="true">RN</div>
+        <div><div class="brand-name">Radar de Nichos</div><div class="brand-caption">Pesquisa de oportunidades em etapas</div></div>
+      </div>
+      <div class="offline-badge"><span></span> Funciona sem enviar seus dados</div>
+    </header>
+
+    <section class="hero">
+      <div>
+        <div class="eyebrow">Da observação ao primeiro teste</div>
+        <h1>Encontre um nicho<br>que vale investigar.</h1>
+        <p>Combine um público, uma dor recorrente e uma oferta possível. O Radar organiza hipóteses, compara sinais e sugere como testar interesse antes de investir em uma solução completa.</p>
+      </div>
+      <div class="hero-note"><strong>Use como mapa de investigação.</strong><br>As notas são heurísticas para priorizar conversas e testes. Elas não medem tamanho de mercado nem substituem pesquisa com clientes.</div>
+    </section>
+
+    <div class="layout">
+      <aside class="panel form-panel">
+        <div class="section-head">
+          <div class="step">01</div>
+          <div><h2>Defina seu ponto de partida</h2><p>Preencha o que já sabe. Os campos marcados como opcionais podem ficar em branco.</p></div>
+        </div>
+        <form id="niche-form">
+          <div class="form-block">
+            <div class="field">
+              <label class="form-label" for="sector">Área para explorar</label>
+              <select class="form-select" id="sector">
+                <option value="all">Explorar várias áreas</option>
+                <option value="health">Saúde e bem-estar</option>
+                <option value="education">Educação e carreira</option>
+                <option value="food">Alimentação</option>
+                <option value="business">Pequenos negócios e serviços</option>
+                <option value="home">Casa e comunidade</option>
+                <option value="sustainability">Sustentabilidade</option>
+                <option value="digital">Tecnologia e negócios digitais</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="form-label" for="audience">Público que quer atender <span class="optional">opcional</span></label>
+              <input class="form-control" id="audience" type="text" maxlength="100" placeholder="Ex.: clínicas pequenas, cuidadores, lojas de bairro">
+            </div>
+            <div class="field">
+              <label class="form-label" for="problem">Problema ou tarefa mal resolvida <span class="optional">opcional</span></label>
+              <textarea class="form-control" id="problem" maxlength="220" placeholder="Ex.: perdem tempo confirmando consultas e reagendando faltas"></textarea>
+            </div>
+            <div class="field">
+              <label class="form-label" for="strength">O que você conhece, tem ou consegue acessar? <span class="optional">opcional</span></label>
+              <input class="form-control" id="strength" type="text" maxlength="120" placeholder="Ex.: experiência em vendas, contatos em clínicas, equipamento">
+            </div>
+            <div class="field">
+              <label class="form-label" for="region">Cidade ou alcance</label>
+              <input class="form-control" id="region" type="text" maxlength="70" placeholder="Ex.: Campinas, região metropolitana, online">
+            </div>
+          </div>
+
+          <div class="form-block">
+            <div class="two-col">
+              <div class="field">
+                <label class="form-label" for="model">Modelo de oferta</label>
+                <select class="form-select" id="model">
+                  <option value="any">Ainda não sei</option>
+                  <option value="service">Serviço especializado</option>
+                  <option value="recurring">Serviço recorrente</option>
+                  <option value="digital">Produto ou curso digital</option>
+                  <option value="software">Software ou automação</option>
+                  <option value="physical">Produto físico / curadoria</option>
+                  <option value="community">Assinatura / comunidade</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="form-label" for="budget">Capital inicial</label>
+                <select class="form-select" id="budget">
+                  <option value="1">Até R$ 1 mil</option>
+                  <option value="2">R$ 1 mil a R$ 5 mil</option>
+                  <option value="3">R$ 5 mil a R$ 25 mil</option>
+                  <option value="4">Acima de R$ 25 mil</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-block">
+            <div class="field" style="margin-bottom:11px">
+              <div class="form-label">Avalie os sinais que você já observou</div>
+              <p class="field-hint">1 = sinal fraco ou desconhecido · 5 = sinal forte confirmado por experiência ou conversa</p>
+            </div>
+            <div class="range-row"><div class="range-top"><label for="urgency">Urgência e frequência da dor</label><output class="range-value" id="urgency-value">3</output></div><input id="urgency" type="range" min="1" max="5" value="3"><div class="range-caption"><span>Rara / leve</span><span>Frequente / urgente</span></div></div>
+            <div class="range-row"><div class="range-top"><label for="payment">Disposição para pagar</label><output class="range-value" id="payment-value">3</output></div><input id="payment" type="range" min="1" max="5" value="3"><div class="range-caption"><span>Não observada</span><span>Já pagam para resolver</span></div></div>
+            <div class="range-row"><div class="range-top"><label for="reach">Facilidade de encontrar o público</label><output class="range-value" id="reach-value">3</output></div><input id="reach" type="range" min="1" max="5" value="3"><div class="range-caption"><span>Difícil acesso</span><span>Contatos ou canal claro</span></div></div>
+            <div class="range-row"><div class="range-top"><label for="fit">Seu conhecimento ou vantagem</label><output class="range-value" id="fit-value">3</output></div><input id="fit" type="range" min="1" max="5" value="3"><div class="range-caption"><span>Preciso aprender</span><span>Experiência ou acesso</span></div></div>
+            <div class="range-row"><div class="range-top"><label for="gap">Lacuna nas opções atuais</label><output class="range-value" id="gap-value">3</output></div><input id="gap" type="range" min="1" max="5" value="3"><div class="range-caption"><span>Soluções satisfatórias</span><span>Há queixas recorrentes</span></div></div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" type="submit">Gerar oportunidades <span aria-hidden="true">→</span></button>
+            <button class="btn btn-quiet" type="reset" id="reset-button">Limpar</button>
+          </div>
+        </form>
+      </aside>
+
+      <section class="right-col" aria-live="polite">
+        <div class="panel results-panel">
+          <div class="results-top">
+            <div><div class="section-head" style="margin:0"><div class="step">02</div><div><h2>Hipóteses para investigar</h2><p class="result-count" id="result-count">Algumas ideias para começar a explorar</p></div></div></div>
+            <div class="results-actions"><button class="btn btn-quiet" id="download-button" type="button">Baixar análise</button><button class="btn btn-quiet" type="button" onclick="window.print()">Imprimir</button></div>
+          </div>
+          <div class="ranking-note"><span class="spark" aria-hidden="true">i</span><span><strong>Como ler as notas:</strong> combinam suas avaliações com estimativas iniciais do arquétipo de negócio, custo e formato. São pontos de partida, não dados de demanda observada.</span></div>
+          <div class="cards" id="idea-cards"></div>
+        </div>
+
+        <section class="panel compare-panel" aria-labelledby="compare-title">
+          <div class="compare-head"><div><div class="section-head" style="margin:0"><div class="step">03</div><div><h2 id="compare-title">Compare até 3 opções</h2><p>Guarde ideias para decidir qual merece o primeiro teste.</p></div></div></div><button class="btn btn-quiet" id="clear-compare" type="button">Limpar seleção</button></div>
+          <div id="compare-content"><div class="compare-empty">Use “Comparar” em uma hipótese para colocá-la lado a lado com as demais.</div></div>
+        </section>
+
+        <section class="panel validation-panel">
+          <div class="section-head" style="margin:0"><div class="step">04</div><div><h2>Valide antes de construir</h2><p>Um roteiro curto para transformar uma hipótese em evidência de mercado.</p></div></div>
+          <div class="validation-grid">
+            <div class="validation-step"><span>Dias 1–2 · Conversas</span><p>Converse com 8 a 12 pessoas do público. Peça exemplos recentes, custos e como resolvem o problema hoje.</p></div>
+            <div class="validation-step"><span>Dias 3–4 · Oferta</span><p>Apresente uma solução manual e específica, com escopo e preço piloto. Observe dúvidas e objeções concretas.</p></div>
+            <div class="validation-step"><span>Dias 5–7 · Compromisso</span><p>Convide para uma pré-venda, piloto pago ou agendamento real. Meça ação, não apenas elogios ou intenção.</p></div>
+          </div>
+          <div class="questions" aria-label="Perguntas para entrevistas"><span class="question-chip">“Quando isso aconteceu pela última vez?”</span><span class="question-chip">“O que você tentou fazer?”</span><span class="question-chip">“Quanto tempo ou dinheiro custa?”</span><span class="question-chip">“Quem decide e paga?”</span></div>
+        </section>
+        <div class="footer-note"><span>O Radar funciona localmente no navegador e não consulta tendências, concorrentes ou dados de vendas em tempo real. Pesquise fontes do seu setor e confirme cada hipótese com compradores reais.</span><span>Radar de Nichos · edição local</span></div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var templates = [
+        { sector:"health", sectorName:"Saúde e bem-estar", title:"Recuperação de horários vagos em clínicas", audience:"clínicas pequenas e profissionais de saúde autônomos", problem:"faltas, cancelamentos e tempo gasto para preencher a agenda", offer:"Configuração de lembretes, confirmação e lista de espera, com acompanhamento mensal.", buyer:"Dono da clínica ou profissional responsável pela agenda", model:"recurring", cost:1, signals:{urgency:4,payment:4,reach:3,fit:3,gap:4}, test:"Ofereça a 5 clínicas um piloto manual de confirmação e lista de espera por 2 semanas. Compare faltas e horários recuperados.", risk:"A equipe pode já ter uma rotina eficiente ou não registrar faltas." },
+        { sector:"health", sectorName:"Saúde e bem-estar", title:"Apoio prático para cuidadores familiares", audience:"familiares que cuidam de pessoas idosas ou dependentes", problem:"sobrecarga para organizar consultas, rotina, documentos e rede de apoio", offer:"Grupo guiado, encontros práticos e materiais de organização; parcerias com profissionais locais.", buyer:"Familiar cuidador; em alguns casos, empresas ou clínicas parceiras", model:"community", cost:1, signals:{urgency:5,payment:3,reach:3,fit:3,gap:4}, test:"Entreviste cuidadores e teste um encontro pago com um tema específico, como organização de consultas ou divisão de tarefas.", risk:"Pode haver necessidade de confiança, encaminhamento profissional e grande sensibilidade no atendimento." },
+        { sector:"health", sectorName:"Saúde e bem-estar", title:"Prevenção de riscos psicossociais para pequenas empresas", audience:"pequenos empregadores sem equipe interna de saúde ocupacional", problem:"dificuldade de identificar fatores de risco e organizar ações preventivas", offer:"Diagnóstico inicial, plano de ação e capacitação de lideranças com escopo claro.", buyer:"Proprietário, RH ou responsável por saúde e segurança do trabalho", model:"service", cost:2, signals:{urgency:4,payment:4,reach:3,fit:3,gap:4}, test:"Converse com 8 empresas e profissionais de SST. Teste uma sessão diagnóstica paga e valide requisitos técnicos e de conformidade.", risk:"Exige qualificação adequada, limites profissionais e atualização regulatória." },
+        { sector:"health", sectorName:"Saúde e bem-estar", title:"Jornada de retorno para pacientes que interrompem cuidados", audience:"consultórios com acompanhamento recorrente", problem:"pacientes deixam de comparecer e a equipe perde o contato de continuidade", offer:"Fluxo de retorno, comunicação consentida e acompanhamento de indicadores para a clínica.", buyer:"Gestor da clínica ou profissional responsável pelo acompanhamento", model:"software", cost:2, signals:{urgency:4,payment:3,reach:3,fit:3,gap:3}, test:"Mapeie com 3 consultórios como a continuidade é feita hoje e desenhe um fluxo manual para um grupo pequeno.", risk:"Privacidade, consentimento e integração com sistemas existentes precisam ser tratados." },
+        { sector:"education", sectorName:"Educação e carreira", title:"Portfólio profissional para mudança de carreira", audience:"profissionais em transição que precisam demonstrar experiência", problem:"currículos não mostram habilidades práticas ou resultados transferíveis", offer:"Programa curto com diagnóstico, projeto demonstrável e revisão de apresentação profissional.", buyer:"Profissional em transição; possível pagador complementar: empregador", model:"service", cost:1, signals:{urgency:4,payment:3,reach:4,fit:3,gap:4}, test:"Faça 6 entrevistas e venda 3 sessões piloto de revisão de portfólio com entrega objetiva.", risk:"A disposição para pagar pode cair quando o público está desempregado ou em transição." },
+        { sector:"education", sectorName:"Educação e carreira", title:"Comunicação e retenção para escolas pequenas", audience:"escolas independentes e cursos livres", problem:"faltas, dúvidas repetidas e comunicação fragmentada com responsáveis", offer:"Rotina de comunicação, lembretes e painel simples de acompanhamento de presença.", buyer:"Direção ou coordenação administrativa da escola", model:"recurring", cost:2, signals:{urgency:3,payment:4,reach:3,fit:3,gap:3}, test:"Converse com 5 gestores e mapeie um fluxo que hoje consome tempo. Proponha executar a rotina manualmente por um mês.", risk:"Ciclos de compra e calendário escolar podem atrasar a decisão." },
+        { sector:"education", sectorName:"Educação e carreira", title:"Treinamento aplicado para equipes de linha de frente", audience:"pequenas empresas com equipes operacionais", problem:"treinamentos genéricos não mudam a rotina nem são fáceis de acompanhar", offer:"Microtreinamentos por função, exercícios no trabalho e acompanhamento de adoção.", buyer:"Dono, RH ou gestor operacional", model:"digital", cost:1, signals:{urgency:3,payment:4,reach:3,fit:3,gap:4}, test:"Teste um módulo de 30 minutos com uma equipe e compare erros, dúvidas ou tempo antes e depois.", risk:"O comprador pode preferir treinamento interno ou exigir comprovação de resultado." },
+        { sector:"education", sectorName:"Educação e carreira", title:"Aprendizagem prática para ferramentas de trabalho", audience:"profissionais que precisam aprender uma ferramenta específica", problem:"cursos longos deixam dúvidas sem resposta para tarefas reais", offer:"Oficina ao vivo com exercício do próprio trabalho e suporte curto após a aula.", buyer:"Profissional individual ou empresa que compra para a equipe", model:"digital", cost:1, signals:{urgency:3,payment:3,reach:4,fit:4,gap:3}, test:"Anuncie uma oficina com data, resultado e preço. Abra inscrições antes de preparar todo o conteúdo.", risk:"A procura pode depender da ferramenta ou habilidade escolhida e mudar rapidamente." },
+        { sector:"food", sectorName:"Alimentação", title:"Refeições planejadas para uma rotina específica", audience:"famílias ocupadas em uma região de entrega delimitada", problem:"falta tempo para planejar refeições e reduzir desperdício durante a semana", offer:"Cardápio semanal por encomenda, kits preparados ou lista de compras com entrega local.", buyer:"Famílias ou profissionais responsáveis pela compra da casa", model:"physical", cost:3, signals:{urgency:3,payment:4,reach:3,fit:3,gap:3}, test:"Venda um lote pequeno por pré-encomenda a 10 famílias e acompanhe recompra e margem real.", risk:"Logística, conservação, custos de insumos e exigências sanitárias afetam a margem." },
+        { sector:"food", sectorName:"Alimentação", title:"Alimentação para uma restrição ou preferência local", audience:"pessoas com necessidade alimentar específica em um bairro", problem:"opções confiáveis são difíceis de encontrar ou comprar com frequência", offer:"Seleção semanal de produtos ou refeições sob encomenda, com informação clara de ingredientes.", buyer:"Consumidor final; possíveis parceiros: nutricionistas e lojas locais", model:"physical", cost:3, signals:{urgency:4,payment:4,reach:3,fit:3,gap:4}, test:"Faça entrevistas e uma pré-venda de pequeno lote antes de investir em estoque ou equipamentos.", risk:"Segurança alimentar, rotulagem e confiança precisam ser comprovadas." },
+        { sector:"food", sectorName:"Alimentação", title:"Venda direta de produtores para compradores recorrentes", audience:"pequenos produtores e consumidores de uma mesma região", problem:"produtor tem dificuldade de prever demanda e consumidor compra sem conhecer origem", offer:"Clube de pedidos semanais ou catálogo local com retirada em ponto fixo.", buyer:"Consumidor recorrente; o produtor pode pagar por acesso a pedidos", model:"community", cost:2, signals:{urgency:3,payment:3,reach:3,fit:3,gap:4}, test:"Monte um catálogo com 3 produtores e tente fechar pedidos de uma única semana antes de automatizar.", risk:"Oferta irregular, sazonalidade e custo de entrega podem comprometer a experiência." },
+        { sector:"business", sectorName:"Pequenos negócios e serviços", title:"Cobrança e fluxo de caixa para profissionais autônomos", audience:"prestadores de serviços que faturam por projeto ou recorrência", problem:"atrasos, cobranças esquecidas e baixa visibilidade do dinheiro a receber", offer:"Organização de contas, lembretes e rotina semanal de acompanhamento financeiro.", buyer:"O próprio profissional autônomo", model:"recurring", cost:1, signals:{urgency:4,payment:4,reach:4,fit:3,gap:3}, test:"Ofereça a 5 profissionais uma organização manual de contas a receber por 30 dias e meça atrasos recuperados.", risk:"O cliente pode esperar aconselhamento financeiro além do escopo do serviço." },
+        { sector:"business", sectorName:"Pequenos negócios e serviços", title:"Resposta rápida a novos contatos comerciais", audience:"empresas locais que recebem pedidos por telefone e mensagens", problem:"demora em responder, esquecer retornos e perder pedidos de orçamento", offer:"Configuração de triagem, agenda e acompanhamento de contatos com ferramentas simples.", buyer:"Dono ou responsável comercial da empresa", model:"software", cost:1, signals:{urgency:4,payment:4,reach:4,fit:3,gap:3}, test:"Acompanhe por uma semana quantos pedidos ficam sem retorno em 5 empresas; proponha um piloto manual.", risk:"Automação sem ajuste de processo pode apenas acelerar respostas ruins." },
+        { sector:"business", sectorName:"Pequenos negócios e serviços", title:"Rotinas administrativas como serviço para um setor", audience:"pequenas empresas de um mesmo segmento profissional", problem:"tarefas administrativas se repetem, mas não justificam uma contratação interna", offer:"Pacote mensal com tarefas delimitadas, calendário e relatório simples de pendências.", buyer:"Proprietário ou gerente administrativo", model:"recurring", cost:1, signals:{urgency:3,payment:4,reach:3,fit:4,gap:4}, test:"Escolha um setor e ofereça a 3 empresas um pacote piloto de uma tarefa recorrente e mensurável.", risk:"Sem um recorte claro, o escopo cresce e a operação fica difícil de padronizar." },
+        { sector:"business", sectorName:"Pequenos negócios e serviços", title:"Conteúdo que gera pedidos para especialistas locais", audience:"profissionais experientes que dependem de indicação", problem:"há conhecimento técnico, mas falta tempo ou método para mostrar valor online", offer:"Entrevistas, peças de conteúdo e chamada para uma oferta ou consulta específica.", buyer:"Profissional ou pequena empresa contratante", model:"service", cost:1, signals:{urgency:2,payment:3,reach:4,fit:4,gap:3}, test:"Crie 3 peças com um profissional e meça conversas qualificadas geradas, não apenas visualizações.", risk:"Resultados dependem da oferta, reputação e consistência do cliente." },
+        { sector:"home", sectorName:"Casa e comunidade", title:"Manutenção preventiva para imóveis pequenos", audience:"proprietários, síndicos e pequenos administradores de imóveis", problem:"reparos são feitos tarde, sem histórico e com dificuldade de encontrar prestadores", offer:"Vistoria periódica, lista de prioridades e coordenação de profissionais locais.", buyer:"Proprietário, síndico ou administrador de imóveis", model:"recurring", cost:2, signals:{urgency:3,payment:4,reach:3,fit:3,gap:4}, test:"Faça 5 vistorias pagas com escopo limitado e acompanhe quais serviços são solicitados depois.", risk:"Responsabilidade por terceiros, qualidade e garantia do serviço precisam de regras claras." },
+        { sector:"home", sectorName:"Casa e comunidade", title:"Adaptação residencial para envelhecer com segurança", audience:"famílias que apoiam idosos ou pessoas com mobilidade reduzida", problem:"riscos e barreiras em casa são percebidos depois de quedas ou acidentes", offer:"Avaliação de acessibilidade, plano de pequenas adaptações e encaminhamento de fornecedores.", buyer:"Familiar, proprietário ou instituição parceira", model:"service", cost:2, signals:{urgency:4,payment:3,reach:3,fit:3,gap:4}, test:"Converse com famílias e profissionais de cuidado; ofereça uma avaliação piloto com escopo bem definido.", risk:"Exige competência técnica para recomendações seguras e cuidado com promessas de saúde." },
+        { sector:"home", sectorName:"Casa e comunidade", title:"Gestão de consumo para condomínios pequenos", audience:"condomínios com pouca estrutura administrativa", problem:"água, energia e manutenção são acompanhadas sem dados organizados", offer:"Leitura periódica de consumo, alertas e plano simples de redução de desperdício.", buyer:"Síndico ou administradora de condomínio", model:"software", cost:2, signals:{urgency:3,payment:3,reach:3,fit:3,gap:4}, test:"Analise dados de 3 condomínios com autorização e apresente oportunidades quantificadas de economia.", risk:"Economias precisam ser mensuráveis; dados de medição podem ser incompletos." },
+        { sector:"home", sectorName:"Casa e comunidade", title:"Serviços confiáveis para pequenos espaços de trabalho", audience:"salas comerciais, clínicas e escritórios de poucos funcionários", problem:"limpeza, manutenção e reposição são contratadas de forma fragmentada", offer:"Pacote mensal com checklist, agenda e rede local de prestadores verificados.", buyer:"Dono do espaço ou administrador", model:"recurring", cost:2, signals:{urgency:3,payment:4,reach:3,fit:3,gap:3}, test:"Teste um pacote mensal em 3 espaços e registre horas poupadas, falhas e recompra.", risk:"Margem depende de deslocamento, disponibilidade e padrão dos prestadores." },
+        { sector:"sustainability", sectorName:"Sustentabilidade", title:"Redução de desperdício para restaurantes pequenos", audience:"restaurantes independentes com equipe enxuta", problem:"sobras, compras e perdas são pouco registradas e reduzem a margem", offer:"Diagnóstico rápido, rotina de pesagem e ajustes no processo de compra e preparo.", buyer:"Proprietário ou gerente do restaurante", model:"service", cost:1, signals:{urgency:4,payment:4,reach:3,fit:3,gap:4}, test:"Meça perdas em 3 cozinhas por alguns dias e proponha uma intervenção curta com economia acompanhada.", risk:"Equipe pode não manter registros; qualquer ganho precisa ser validado com dados do local." },
+        { sector:"sustainability", sectorName:"Sustentabilidade", title:"Reparo e revenda de uma categoria de produtos", audience:"consumidores locais interessados em economizar e reutilizar", problem:"produtos duráveis são descartados porque reparar parece difícil ou incerto", offer:"Curadoria, reparo com parceiros e revenda com garantia clara em uma categoria específica.", buyer:"Consumidor final; parceiros podem incluir lojas ou oficinas", model:"physical", cost:3, signals:{urgency:2,payment:3,reach:3,fit:3,gap:4}, test:"Escolha uma categoria, anuncie itens reparados sob encomenda e teste procura antes de formar estoque.", risk:"Peças, garantia, qualidade e custo de aquisição podem reduzir a margem." },
+        { sector:"sustainability", sectorName:"Sustentabilidade", title:"Plano de eficiência para pequenos condomínios", audience:"síndicos e administradores de edifícios de pequeno porte", problem:"consumo alto é percebido, mas não há plano priorizado de correção", offer:"Leitura de contas, inspeção básica e plano de ações de baixo custo com medição posterior.", buyer:"Síndico, conselho ou administradora", model:"service", cost:2, signals:{urgency:3,payment:3,reach:3,fit:3,gap:3}, test:"Converse com 5 síndicos e ofereça um diagnóstico pago com escopo, dados necessários e economia verificável.", risk:"Depende de acesso a dados confiáveis e de separar economia estimada de economia obtida." },
+        { sector:"digital", sectorName:"Tecnologia e negócios digitais", title:"Automação leve para uma rotina de um setor", audience:"pequenas empresas com processos repetitivos em planilhas e mensagens", problem:"informações são copiadas entre ferramentas e tarefas ficam sem responsável", offer:"Mapeamento e automação simples de um fluxo, com documentação e manutenção opcional.", buyer:"Dono ou gestor da operação", model:"software", cost:1, signals:{urgency:3,payment:4,reach:3,fit:4,gap:3}, test:"Observe um fluxo em 5 empresas e automatize apenas uma etapa para medir tempo e erro antes e depois.", risk:"Automação pode falhar quando o processo muda ou depende de ferramentas de terceiros." },
+        { sector:"digital", sectorName:"Tecnologia e negócios digitais", title:"Kit digital específico para uma profissão", audience:"profissionais autônomos que repetem documentos e tarefas parecidas", problem:"cada atendimento começa do zero e depende de arquivos improvisados", offer:"Modelos, checklists e instruções práticas para uma tarefa frequente de um setor.", buyer:"Profissional individual ou associação profissional", model:"digital", cost:1, signals:{urgency:2,payment:3,reach:4,fit:4,gap:3}, test:"Mostre um protótipo a 10 profissionais e tente vender antes de produzir o kit completo.", risk:"Modelos genéricos podem ser facilmente copiados ou não servir a todos os casos." },
+        { sector:"digital", sectorName:"Tecnologia e negócios digitais", title:"Pesquisa e conteúdo técnico para especialistas", audience:"consultores e profissionais com conhecimento difícil de explicar", problem:"conteúdo toma tempo e não traduz o serviço em uma oferta compreensível", offer:"Entrevistas, síntese de conhecimento e materiais que apoiam vendas ou treinamento.", buyer:"Especialista, consultoria ou empresa técnica", model:"service", cost:1, signals:{urgency:2,payment:3,reach:3,fit:4,gap:3}, test:"Faça uma peça piloto com um especialista e valide se gera reuniões, pedidos ou uso interno.", risk:"É preciso distinguir entrega editorial de promessa de vendas ou alcance." },
+        { sector:"digital", sectorName:"Tecnologia e negócios digitais", title:"Comunidade profissional em torno de uma tarefa concreta", audience:"profissionais que trabalham isolados em uma área específica", problem:"falta troca confiável de prática, referências e oportunidades", offer:"Encontros curtos, grupo moderado e recursos úteis ligados a um resultado recorrente.", buyer:"Membro individual ou empresa patrocinadora", model:"community", cost:1, signals:{urgency:2,payment:2,reach:3,fit:4,gap:3}, test:"Organize 2 encontros com tema e público delimitados; cobre por uma sessão antes de criar assinatura.", risk:"Comunidade exige presença contínua e pode ter baixa retenção sem valor recorrente." }
+      ];
+
+      var form = document.getElementById("niche-form");
+      var cardRoot = document.getElementById("idea-cards");
+      var compareContent = document.getElementById("compare-content");
+      var selected = [];
+      var currentIdeas = [];
+      var lastInputs = null;
+      var labels = { urgency:"Urgência", payment:"Pagamento", reach:"Acesso", fit:"Aderência", gap:"Lacuna" };
+      var weights = { urgency:.24, payment:.22, reach:.18, fit:.20, gap:.16 };
+
+      function escapeHTML(value) {
+        return String(value == null ? "" : value).replace(/[&<>"']/g, function (ch) {
+          return {"&":"&amp;", "<":"&lt;", ">":"&gt;", "\"":"&quot;", "'":"&#39;"}[ch];
+        });
+      }
+      function getRatings() {
+        return { urgency:Number(document.getElementById("urgency").value), payment:Number(document.getElementById("payment").value), reach:Number(document.getElementById("reach").value), fit:Number(document.getElementById("fit").value), gap:Number(document.getElementById("gap").value) };
+      }
+      function selectedModelBonus(template, chosen) {
+        if (chosen === "any") return 0;
+        if (template.model === chosen) return 5;
+        var close = (chosen === "service" && template.model === "recurring") || (chosen === "recurring" && template.model === "service") || (chosen === "digital" && template.model === "software") || (chosen === "software" && template.model === "digital") || (chosen === "community" && template.model === "digital");
+        return close ? 1 : -4;
+      }
+      function budgetAdjustment(templateCost, budget) {
+        return Math.max(0, Number(templateCost) - Number(budget)) * 7;
+      }
+      function scoreIdea(template, ratings, budget, model) {
+        var userScore = 0;
+        var baseScore = 0;
+        Object.keys(weights).forEach(function (key) {
+          userScore += ratings[key] * weights[key];
+          baseScore += template.signals[key] * weights[key];
+        });
+        var raw = ((userScore * .62) + (baseScore * .38)) * 20;
+        raw += selectedModelBonus(template, model);
+        raw -= budgetAdjustment(template.cost, budget);
+        return Math.max(20, Math.min(98, Math.round(raw)));
+      }
+      function costLabel(value) {
+        return value === 1 ? "Baixo investimento" : value === 2 ? "Investimento moderado" : "Exige mais capital";
+      }
+      function modelLabel(model) {
+        return {service:"Serviço especializado", recurring:"Serviço recorrente", digital:"Produto digital", software:"Software / automação", physical:"Produto físico", community:"Assinatura / comunidade"}[model] || "Oferta a definir";
+      }
+      function buildIdeas(inputs) {
+        var pool = templates.filter(function (item) { return inputs.sector === "all" || item.sector === inputs.sector; });
+        return pool.map(function (template, index) {
+          var target = inputs.audience || template.audience;
+          var pain = inputs.problem || template.problem;
+          return {
+            id:template.sector + "-" + index,
+            sector:template.sectorName,
+            title:template.title,
+            audience:target,
+            problem:pain,
+            offer:template.offer,
+            buyer:template.buyer,
+            model:template.model,
+            modelName:modelLabel(template.model),
+            cost:template.cost,
+            costName:costLabel(template.cost),
+            signals:template.signals,
+            test:template.test,
+            risk:template.risk,
+            location:inputs.region,
+            strength:inputs.strength,
+            score:scoreIdea(template, inputs.ratings, inputs.budget, inputs.model)
+          };
+        }).sort(function (a, b) { return b.score - a.score || a.title.localeCompare(b.title, "pt-BR"); }).slice(0, inputs.sector === "all" ? 6 : 4);
+      }
+      function scoreBars(idea) {
+        return Object.keys(weights).map(function (key) {
+          var value = idea.signals[key] * 20;
+          return '<div class="score-line"><span>' + labels[key] + '</span><div class="bar-track" aria-hidden="true"><div class="bar-fill" style="width:' + value + '%"></div></div><b>' + idea.signals[key] + '/5</b></div>';
+        }).join("");
+      }
+      function cardHTML(idea, index) {
+        var isSelected = selected.indexOf(idea.id) !== -1;
+        var featured = index === 0 ? " featured" : "";
+        var placeText = idea.location ? " na região de " + escapeHTML(idea.location) : "";
+        var strengthText = idea.strength ? " Seu ponto de partida informado: " + escapeHTML(idea.strength) + "." : "";
+        return '<article class="idea-card' + featured + '">' +
+          '<div class="card-top"><div class="sector-label">' + escapeHTML(idea.sector) + (index === 0 ? ' · prioridade inicial' : '') + '</div><div class="score" aria-label="Nota heurística ' + idea.score + ' de 100"><strong>' + idea.score + '</strong><span>/100</span></div></div>' +
+          '<h3>' + escapeHTML(idea.title) + '</h3>' +
+          '<div class="segment">Público: ' + escapeHTML(idea.audience) + '</div>' +
+          '<p class="card-copy"><strong>Oportunidade:</strong> ' + escapeHTML(idea.problem) + placeText + '.</p>' +
+          '<p class="card-copy"><strong>Oferta possível:</strong> ' + escapeHTML(idea.offer) + '</p>' +
+          '<p class="card-copy"><strong>Quem tende a pagar:</strong> ' + escapeHTML(idea.buyer) + '. <strong>Formato:</strong> ' + escapeHTML(idea.modelName) + '.' + strengthText + '</p>' +
+          '<div class="score-bars" aria-label="Sinais estimados pelo arquétipo do negócio">' + scoreBars(idea) + '</div>' +
+          '<div class="test-box"><strong>Primeiro teste:</strong> ' + escapeHTML(idea.test) + '<br><strong>Risco para verificar:</strong> ' + escapeHTML(idea.risk) + '</div>' +
+          '<div class="card-footer"><span class="cost-tag">' + escapeHTML(idea.costName) + '</span><button type="button" class="btn compare-btn" data-compare="' + escapeHTML(idea.id) + '" aria-pressed="' + isSelected + '">' + (isSelected ? 'Selecionada' : 'Comparar') + '</button></div>' +
+          '</article>';
+      }
+      function renderIdeas(ideas, inputs) {
+        currentIdeas = ideas;
+        var area = inputs.sector === "all" ? "várias áreas" : (ideas[0] ? ideas[0].sector : "esta área");
+        document.getElementById("result-count").textContent = ideas.length + " hipóteses em " + area + (inputs.audience ? " · público: " + inputs.audience : " · público sugerido por oportunidade");
+        cardRoot.innerHTML = ideas.map(cardHTML).join("");
+        cardRoot.querySelectorAll("[data-compare]").forEach(function (button) {
+          button.addEventListener("click", function () { toggleCompare(button.getAttribute("data-compare")); });
+        });
+        renderCompare();
+      }
+      function toggleCompare(id) {
+        var pos = selected.indexOf(id);
+        if (pos !== -1) selected.splice(pos, 1);
+        else if (selected.length < 3) selected.push(id);
+        else { window.alert("Você pode comparar até 3 hipóteses. Remova uma para adicionar outra."); return; }
+        if (lastInputs) renderIdeas(buildIdeas(lastInputs), lastInputs);
+      }
+      function renderCompare() {
+        var ideas = selected.map(function (id) { return currentIdeas.find(function (idea) { return idea.id === id; }); }).filter(Boolean);
+        if (!ideas.length) {
+          compareContent.innerHTML = '<div class="compare-empty">Use “Comparar” em uma hipótese para colocá-la lado a lado com as demais.</div>';
+          return;
+        }
+        compareContent.innerHTML = '<div class="compare-list">' + ideas.map(function (idea) {
+          return '<div class="compare-item"><strong>' + escapeHTML(idea.title) + '</strong><span class="compare-score">' + idea.score + '/100</span><span class="compare-sub">' + escapeHTML(idea.modelName) + ' · ' + escapeHTML(idea.costName) + '</span><span class="compare-sub compare-risk">Risco: ' + escapeHTML(idea.risk) + '</span><button class="btn remove-compare" type="button" data-remove="' + escapeHTML(idea.id) + '" aria-label="Remover ' + escapeHTML(idea.title) + '">×</button></div>';
+        }).join("") + '</div>';
+        compareContent.querySelectorAll("[data-remove]").forEach(function (button) {
+          button.addEventListener("click", function () { toggleCompare(button.getAttribute("data-remove")); });
+        });
+      }
+      function readInputs() {
+        return {
+          sector:document.getElementById("sector").value,
+          audience:document.getElementById("audience").value.trim(),
+          problem:document.getElementById("problem").value.trim(),
+          strength:document.getElementById("strength").value.trim(),
+          region:document.getElementById("region").value.trim(),
+          model:document.getElementById("model").value,
+          budget:Number(document.getElementById("budget").value),
+          ratings:getRatings()
+        };
+      }
+      function generate(event) {
+        if (event) event.preventDefault();
+        lastInputs = readInputs();
+        selected = [];
+        renderIdeas(buildIdeas(lastInputs), lastInputs);
+      }
+      function updateRange(event) {
+        document.getElementById(event.target.id + "-value").textContent = event.target.value;
+      }
+      function downloadReport() {
+        if (!currentIdeas.length) return;
+        var lines = ["RADAR DE NICHOS - HIPOTESES PARA INVESTIGAR", "", "Notas heurísticas; não representam dados de mercado verificados.", ""];
+        currentIdeas.forEach(function (idea, i) {
+          lines.push((i + 1) + ". " + idea.title + " (" + idea.score + "/100)");
+          lines.push("Área: " + idea.sector);
+          lines.push("Público: " + idea.audience);
+          lines.push("Problema: " + idea.problem);
+          lines.push("Oferta: " + idea.offer);
+          lines.push("Quem paga: " + idea.buyer);
+          lines.push("Formato: " + idea.modelName + " | Investimento: " + idea.costName);
+          lines.push("Primeiro teste: " + idea.test);
+          lines.push("Risco: " + idea.risk);
+          lines.push("");
+        });
+        var blob = new Blob([lines.join("\n")], {type:"text/plain;charset=utf-8"});
+        var url = URL.createObjectURL(blob);
+        var link = document.createElement("a");
+        link.href = url;
+        link.download = "radar-de-nichos-analise.txt";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      ["urgency", "payment", "reach", "fit", "gap"].forEach(function (id) { document.getElementById(id).addEventListener("input", updateRange); });
+      form.addEventListener("submit", generate);
+      form.addEventListener("reset", function () {
+        window.setTimeout(function () {
+          ["urgency", "payment", "reach", "fit", "gap"].forEach(function (id) { document.getElementById(id + "-value").textContent = document.getElementById(id).value; });
+          selected = [];
+          generate();
+        }, 0);
+      });
+      document.getElementById("clear-compare").addEventListener("click", function () { selected = []; renderIdeas(currentIdeas, lastInputs || readInputs()); });
+      document.getElementById("download-button").addEventListener("click", downloadReport);
+      generate();
+    }());
+  </script>
+</body>
+</html>
+
